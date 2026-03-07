@@ -69,15 +69,17 @@ if [ "$count" -eq 1 ]; then
     uci commit network
 elif [ "$count" -gt 1 ]; then
     # 多网口设备配置
-    # 配置WAN
+    # 配置WAN（保留现有拨号方式，避免升级时改坏现网）
     uci set network.wan=interface
     uci set network.wan.device="$wan_ifname"
-    uci set network.wan.proto='dhcp'
+    current_wan_proto=$(uci -q get network.wan.proto)
+    [ -z "$current_wan_proto" ] && uci set network.wan.proto='dhcp'
 
-    # 配置WAN6
+    # 配置WAN6（仅在未配置时设置默认值）
     uci set network.wan6=interface
     uci set network.wan6.device="$wan_ifname"
-    uci set network.wan6.proto='dhcpv6'
+    current_wan6_proto=$(uci -q get network.wan6.proto)
+    [ -z "$current_wan6_proto" ] && uci set network.wan6.proto='dhcpv6'
 
     # 查找 br-lan 设备 section
     section=$(uci show network | awk -F '[.=]' '/\.@?device\[\d+\]\.name=.br-lan.$/ {print $2; exit}')
@@ -111,7 +113,7 @@ elif [ "$count" -gt 1 ]; then
 
     # PPPoE设置
     echo "enable_pppoe value: $enable_pppoe" >>$LOGFILE
-    if [ "$enable_pppoe" = "yes" ]; then
+    if [ "$enable_pppoe" = "yes" ] && [ -n "$pppoe_account" ] && [ -n "$pppoe_password" ]; then
         echo "PPPoE enabled, configuring..." >>$LOGFILE
         uci set network.wan.proto='pppoe'
         uci set network.wan.username="$pppoe_account"
@@ -121,7 +123,7 @@ elif [ "$count" -gt 1 ]; then
         uci set network.wan6.proto='none'
         echo "PPPoE config done." >>$LOGFILE
     else
-        echo "PPPoE not enabled." >>$LOGFILE
+        echo "PPPoE not enabled or incomplete credentials, keep existing WAN config." >>$LOGFILE
     fi
 
     uci commit network

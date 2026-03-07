@@ -63,9 +63,6 @@ jobs:
             -v "${{ github.workspace }}/x86-64/build24.sh:/home/build/immortalwrt/build.sh" \
             -e PROFILE=512 \
             -e INCLUDE_DOCKER=$include_docker \
-            -e ENABLE_PPPOE=no \
-            -e PPPOE_ACCOUNT= \
-            -e PPPOE_PASSWORD= \
           immortalwrt/imagebuilder:x86-64-openwrt-${luci_version} /bin/bash /home/build/immortalwrt/build.sh
           
 
