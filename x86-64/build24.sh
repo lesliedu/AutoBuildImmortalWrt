@@ -17,18 +17,31 @@ fi
 # 输出调试信息
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 
+# ============= 同步 wukongdaily/store 的 x86 第三方包 =============
+echo "🔄 同步 wukongdaily/store x86 第三方包..."
+rm -rf /tmp/store-run-repo /home/build/immortalwrt/extra-packages /home/build/immortalwrt/packages
+mkdir -p /home/build/immortalwrt/extra-packages /home/build/immortalwrt/packages
+git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
+cp -r /tmp/store-run-repo/run/x86/* /home/build/immortalwrt/extra-packages/
+sh shell/prepare-packages.sh
+ls -lah /home/build/immortalwrt/packages/ || true
+
 # ============= 默认内置插件（按 192.168.31.1 当前在用配置收敛）==============
 PACKAGES=""
 PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga"
 PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
-# Passwall 由原创作者 release 提供最新 ipk（23.05-24.10 通用包）
-PACKAGES="$PACKAGES xray-core"
-PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn"
+PACKAGES="$PACKAGES xray-core hysteria luci-app-passwall luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
-# 以下组件在 24.10 官方 imagebuilder 源中不可直接获取，先移除，后续如需再单独接第三方 feed：
-# adguardhome / tailscale / netwizard / partexp / watchdog / bandix / advancedplus / webdav2 / unishare / turboacc
+PACKAGES="$PACKAGES luci-app-adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn"
+PACKAGES="$PACKAGES luci-app-netwizard luci-i18n-netwizard-zh-cn"
+PACKAGES="$PACKAGES luci-app-partexp luci-i18n-partexp-zh-cn"
+PACKAGES="$PACKAGES luci-app-watchdog luci-i18n-watchdog-zh-cn"
+PACKAGES="$PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
+PACKAGES="$PACKAGES luci-app-advancedplus luci-i18n-advancedplus-zh-cn"
+PACKAGES="$PACKAGES webdav2 luci-app-unishare"
+PACKAGES="$PACKAGES luci-app-turboacc"
 # 不默认集成：openclash / homeproxy / ddns-go / lucky / docker
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
