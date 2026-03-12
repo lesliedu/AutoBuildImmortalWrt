@@ -24,6 +24,7 @@ PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-confi
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
 # Passwall 由原创作者 release 提供最新 ipk（23.05-24.10 通用包）
+PACKAGES="$PACKAGES xray-core"
 PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
 PACKAGES="$PACKAGES luci-app-adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn"
