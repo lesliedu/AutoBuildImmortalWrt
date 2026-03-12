@@ -20,7 +20,11 @@ EOF
 echo "cat pppoe-settings"
 cat /home/build/immortalwrt/files/etc/config/pppoe-settings
 
-# 仅在确实需要第三方扩展时同步 wukong store；Passwall 不走这里
+# 对齐 192.168.31.1 常用版：这批插件默认补回，统一走第三方包同步链
+COMMON_31_PACKAGES="luci-app-adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn luci-app-netwizard luci-i18n-netwizard-zh-cn luci-app-partexp luci-i18n-partexp-zh-cn luci-app-watchdog luci-i18n-watchdog-zh-cn luci-app-advancedplus luci-i18n-advancedplus-zh-cn webdav2 luci-app-unishare luci-app-turboacc luci-app-ddns luci-i18n-ddns-zh-cn"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES $COMMON_31_PACKAGES"
+
+# 仅在确实需要第三方扩展时同步 wukong store；Passwall / Bandix 不走这里
 if [ -n "$CUSTOM_PACKAGES" ]; then
   echo "🔄 正在同步第三方软件仓库 wukongdaily/store ..."
   rm -rf /tmp/store-run-repo /home/build/immortalwrt/extra-packages /home/build/immortalwrt/packages
