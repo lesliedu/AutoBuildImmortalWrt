@@ -50,7 +50,15 @@ if echo "$PACKAGES" | grep -q "luci-app-passwall"; then
     PASSWALL_VER="26.3.6"
     PASSWALL_BASE="https://github.com/Openwrt-Passwall/openwrt-passwall/releases/download/${PASSWALL_VER}-1"
     wget -q "${PASSWALL_BASE}/23.05-24.10_luci-app-passwall_${PASSWALL_VER}-r1_all.ipk" -O packages/luci-app-passwall_${PASSWALL_VER}-r1_all.ipk
+    if [ $? -ne 0 ]; then
+        echo "⚠️ 首选 URL 下载失败，尝试备用 22.03 版本"
+        wget -q "${PASSWALL_BASE}/22.03-_luci-app-passwall_${PASSWALL_VER}_all.ipk" -O packages/luci-app-passwall_${PASSWALL_VER}_all.ipk
+    fi
     wget -q "${PASSWALL_BASE}/23.05-24.10_luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk" -O packages/luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk
+    if [ $? -ne 0 ]; then
+        echo "⚠️ i18n 首选 URL 下载失败，尝试备用 22.03 版本"
+        wget -q "${PASSWALL_BASE}/22.03-_luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk" -O packages/luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk
+    fi
 fi
 
 # 若构建openclash 则添加内核
