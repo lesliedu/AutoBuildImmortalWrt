@@ -8,42 +8,43 @@ echo "Starting 99-custom.sh at $(date)" >> $LOGFILE
 echo "编译固件大小为: $PROFILE MB"
 echo "Include Docker: $INCLUDE_DOCKER"
 
-if [ -z "$CUSTOM_PACKAGES" ]; then
-  echo "⚪️ 未选择任何额外软件包"
+echo "Create pppoe-settings"
+mkdir -p /home/build/immortalwrt/files/etc/config
+
+cat << EOF > /home/build/immortalwrt/files/etc/config/pppoe-settings
+enable_pppoe=${ENABLE_PPPOE}
+pppoe_account=${PPPOE_ACCOUNT}
+pppoe_password=${PPPOE_PASSWORD}
+EOF
+
+echo "cat pppoe-settings"
+cat /home/build/immortalwrt/files/etc/config/pppoe-settings
+
+# 仅在确实需要第三方扩展时同步 wukong store；Passwall 不走这里
+if [ -n "$CUSTOM_PACKAGES" ]; then
+  echo "🔄 正在同步第三方软件仓库 wukongdaily/store ..."
+  rm -rf /tmp/store-run-repo /home/build/immortalwrt/extra-packages /home/build/immortalwrt/packages
+  mkdir -p /home/build/immortalwrt/extra-packages /home/build/immortalwrt/packages
+  git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
+  cp -r /tmp/store-run-repo/run/x86/* /home/build/immortalwrt/extra-packages/
+  sh shell/prepare-packages.sh
+  ls -lah /home/build/immortalwrt/packages/ || true
 else
-  echo "✅ 使用原仓库/本仓库可用的软件包配置"
+  echo "⚪️ 未选择额外第三方软件包，不同步 wukong store"
 fi
 
 # 输出调试信息
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 
-# ============= 同步 wukongdaily/store 的 x86 第三方包 =============
-echo "🔄 同步 wukongdaily/store x86 第三方包..."
-rm -rf /tmp/store-run-repo /home/build/immortalwrt/extra-packages /home/build/immortalwrt/packages
-mkdir -p /home/build/immortalwrt/extra-packages /home/build/immortalwrt/packages
-git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
-cp -r /tmp/store-run-repo/run/x86/* /home/build/immortalwrt/extra-packages/
-sh shell/prepare-packages.sh
-ls -lah /home/build/immortalwrt/packages/ || true
-
-# ============= 默认内置插件（按 192.168.31.1 当前在用配置收敛）==============
+# ============= 默认内置插件（回归成功版骨架 + 必要修复）==============
 PACKAGES=""
 PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga"
 PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
+# Passwall 使用原创源 release，不走 wukong store
 PACKAGES="$PACKAGES xray-core hysteria luci-app-passwall luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
-# 以下包在当前 x86-64 / 24.10 这条构建链路中仍不可用，先移除以确保固件成功产出：
-# luci-app-adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn
-# luci-app-netwizard luci-i18n-netwizard-zh-cn
-# luci-app-partexp luci-i18n-partexp-zh-cn
-# luci-app-watchdog luci-i18n-watchdog-zh-cn
-# luci-app-bandix luci-i18n-bandix-zh-cn
-# luci-app-advancedplus luci-i18n-advancedplus-zh-cn
-# webdav2 luci-app-unishare
-# luci-app-turboacc
-# 不默认集成：openclash / homeproxy / ddns-go / lucky / docker
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
 # 判断是否需要编译 Docker 插件
@@ -52,7 +53,15 @@ if [ "$INCLUDE_DOCKER" = "yes" ]; then
     echo "Adding package: luci-i18n-dockerman-zh-cn"
 fi
 
-
+# Passwall 由原创作者 release 提供最新 ipk（23.05-24.10 通用包）
+if echo "$PACKAGES" | grep -q "luci-app-passwall"; then
+    echo "✅ 已选择 luci-app-passwall，下载原创作者最新版 ipk"
+    mkdir -p packages
+    PASSWALL_VER="26.3.6"
+    PASSWALL_BASE="https://github.com/Openwrt-Passwall/openwrt-passwall/releases/download/${PASSWALL_VER}-1"
+    wget -q "${PASSWALL_BASE}/23.05-24.10_luci-app-passwall_${PASSWALL_VER}-r1_all.ipk" -O packages/luci-app-passwall_${PASSWALL_VER}-r1_all.ipk
+    wget -q "${PASSWALL_BASE}/23.05-24.10_luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk" -O packages/luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk
+fi
 
 # 若构建openclash 则添加内核
 if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
