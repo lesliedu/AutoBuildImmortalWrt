@@ -27,14 +27,8 @@ PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-
 PACKAGES="$PACKAGES xray-core"
 PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
-PACKAGES="$PACKAGES luci-app-adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn"
-PACKAGES="$PACKAGES luci-app-netwizard luci-i18n-netwizard-zh-cn"
-PACKAGES="$PACKAGES luci-app-partexp luci-i18n-partexp-zh-cn"
-PACKAGES="$PACKAGES luci-app-watchdog luci-i18n-watchdog-zh-cn"
-PACKAGES="$PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
-PACKAGES="$PACKAGES luci-app-advancedplus luci-i18n-advancedplus-zh-cn"
-PACKAGES="$PACKAGES webdav2 luci-app-unishare"
-PACKAGES="$PACKAGES luci-app-turboacc"
+# 以下组件在 24.10 官方 imagebuilder 源中不可直接获取，先移除，后续如需再单独接第三方 feed：
+# adguardhome / tailscale / netwizard / partexp / watchdog / bandix / advancedplus / webdav2 / unishare / turboacc
 # 不默认集成：openclash / homeproxy / ddns-go / lucky / docker
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
