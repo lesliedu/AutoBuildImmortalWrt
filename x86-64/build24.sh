@@ -45,7 +45,6 @@ PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-
 # Passwall 使用原创源 release，不走 wukong store
 PACKAGES="$PACKAGES xray-core hysteria luci-app-passwall luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
-PACKAGES="$PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
 # 判断是否需要编译 Docker 插件
@@ -62,15 +61,6 @@ if echo "$PACKAGES" | grep -q "luci-app-passwall"; then
     PASSWALL_BASE="https://github.com/Openwrt-Passwall/openwrt-passwall/releases/download/${PASSWALL_VER}-1"
     wget -q "${PASSWALL_BASE}/23.05-24.10_luci-app-passwall_${PASSWALL_VER}-r1_all.ipk" -O packages/luci-app-passwall_${PASSWALL_VER}-r1_all.ipk
     wget -q "${PASSWALL_BASE}/23.05-24.10_luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk" -O packages/luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk
-fi
-
-if echo "$PACKAGES" | grep -q "luci-app-bandix"; then
-    echo "✅ 已选择 luci-app-bandix，下载原创作者 release ipk"
-    mkdir -p packages
-    BANDIX_VER="v0.12.6"
-    BANDIX_BASE="https://github.com/timsaya/luci-app-bandix/releases/download/${BANDIX_VER}"
-    wget -q "${BANDIX_BASE}/luci-app-bandix_0.12.6-r1_all.ipk" -O packages/luci-app-bandix_0.12.6-r1_all.ipk
-    wget -q "${BANDIX_BASE}/luci-i18n-bandix-zh-cn_26.068.39505.1002c41_all.ipk" -O packages/luci-i18n-bandix-zh-cn_26.068.39505.1002c41_all.ipk
 fi
 
 # 若构建openclash 则添加内核
