@@ -37,6 +37,41 @@ else
   echo "⚪️ 未选择额外第三方软件包，不同步 wukong store"
 fi
 
+patch_ipk_init_script() {
+  local pattern="$1"
+  local target_path="$2"
+  local search="$3"
+  local replace="$4"
+  local ipk
+
+  for ipk in packages/${pattern}; do
+    [ -f "$ipk" ] || continue
+    echo "🩹 Patching $ipk -> $target_path"
+    local workdir
+    workdir="$(mktemp -d)"
+    (
+      cd "$workdir" || exit 1
+      ar x "$OLDPWD/$ipk"
+      mkdir data control
+      tar -xf data.tar.* -C data
+      tar -xf control.tar.* -C control 2>/dev/null || true
+      if [ -f "data/$target_path" ]; then
+        sed -i "s|$search|$replace|g" "data/$target_path"
+      fi
+      rm -f "$OLDPWD/$ipk"
+      tar -czf control.tar.gz -C control .
+      tar -czf data.tar.gz -C data .
+      echo '2.0' > debian-binary
+      ar r "$OLDPWD/$ipk" debian-binary control.tar.gz data.tar.gz >/dev/null 2>&1
+    )
+    rm -rf "$workdir"
+  done
+}
+
+# 修补第三方包里的已知 init 脚本兼容性问题（不改上游仓库，只改本次构建使用的 ipk）
+patch_ipk_init_script "*netwizard*.ipk" "etc/init.d/netwizard" "\[ \"\\$netwizard_enable\\" = \"1\" -o \"\\$pppoe_enable\\" = \"1\" \]" "[ \"\\$netwizard_enable\\" = \"1\" ] || [ \"\\$pppoe_enable\\" = \"1\" ]"
+patch_ipk_init_script "*vlmcsd*.ipk" "etc/init.d/vlmcsd" '^uci ' 'command -v uci >/dev/null 2>&1 && uci '
+
 # 输出调试信息
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 
