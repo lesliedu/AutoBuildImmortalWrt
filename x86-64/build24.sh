@@ -34,14 +34,15 @@ PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luc
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
 PACKAGES="$PACKAGES xray-core hysteria luci-app-passwall luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
-PACKAGES="$PACKAGES luci-app-adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn"
-PACKAGES="$PACKAGES luci-app-netwizard luci-i18n-netwizard-zh-cn"
-PACKAGES="$PACKAGES luci-app-partexp luci-i18n-partexp-zh-cn"
-PACKAGES="$PACKAGES luci-app-watchdog luci-i18n-watchdog-zh-cn"
-PACKAGES="$PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
-PACKAGES="$PACKAGES luci-app-advancedplus luci-i18n-advancedplus-zh-cn"
-PACKAGES="$PACKAGES webdav2 luci-app-unishare"
-PACKAGES="$PACKAGES luci-app-turboacc"
+# 以下包在当前 x86-64 / 24.10 这条构建链路中仍不可用，先移除以确保固件成功产出：
+# luci-app-adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn
+# luci-app-netwizard luci-i18n-netwizard-zh-cn
+# luci-app-partexp luci-i18n-partexp-zh-cn
+# luci-app-watchdog luci-i18n-watchdog-zh-cn
+# luci-app-bandix luci-i18n-bandix-zh-cn
+# luci-app-advancedplus luci-i18n-advancedplus-zh-cn
+# webdav2 luci-app-unishare
+# luci-app-turboacc
 # 不默认集成：openclash / homeproxy / ddns-go / lucky / docker
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
