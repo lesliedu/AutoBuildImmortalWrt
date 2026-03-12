@@ -46,9 +46,12 @@ PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga"
 PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
-# Passwall 使用原创源 release，不走 wukong store
-PACKAGES="$PACKAGES xray-core hysteria luci-app-passwall luci-i18n-passwall-zh-cn"
+# Passwall / SSR Plus 运行栈
+PACKAGES="$PACKAGES xray-core hysteria sing-box chinadns-ng haproxy shellsync geoview dns2socks dns2tcp ipt2socks v2ray-plugin"
+PACKAGES="$PACKAGES shadowsocks-libev-ss-server shadowsocks-rust-sslocal shadowsocks-rust-ssserver shadowsocksr-libev-ssr-check shadowsocksr-libev-ssr-local shadowsocksr-libev-ssr-redir shadowsocksr-libev-ssr-server simple-obfs-client"
+PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn luci-app-ssr-plus"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
+PACKAGES="$PACKAGES zerotier luci-app-zerotier luci-i18n-zerotier-zh-cn"
 PACKAGES="$PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
