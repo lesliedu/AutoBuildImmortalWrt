@@ -18,7 +18,7 @@ on:
       custom_router_ip:
         description: "请设置路由器的管理地址(仅首次安装生效；升级保留原配置时会忽略) 格式:192.168.x.1 或 10.x.x.1"
         required: true
-        default: "192.168.100.1"
+        default: "192.168.31.1"
       include_docker:
         description: |
           是否编译 Docker 插件
@@ -73,7 +73,7 @@ jobs:
             -v "${{ github.workspace }}/x86-64/imm.config:/home/build/immortalwrt/.config" \
             -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
             -v "${{ github.workspace }}/x86-64/build24.sh:/home/build/immortalwrt/build.sh" \
-            -e PROFILE=512 \
+            -e PROFILE=2048 \
             -e INCLUDE_DOCKER=$include_docker \
             -e ENABLE_PPPOE=${{ github.event.inputs.enable_pppoe }} \
             -e PPPOE_ACCOUNT=${{ github.event.inputs.pppoe_account }} \
