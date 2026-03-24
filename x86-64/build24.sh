@@ -42,7 +42,7 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 
 # ============= 默认内置插件（回归成功版骨架 + 必要修复）==============
 PACKAGES=""
-PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga"
+PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga unzip kmod-nft-tproxy kmod-nft-socket"
 PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
@@ -96,6 +96,56 @@ if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
 else
     echo "⚪️ 未选择 luci-app-openclash"
 fi
+# 获取最新版 Tailscale
+if echo "$PACKAGES" | grep -q "tailscale"; then
+    echo "✅ 正在获取最新版 Tailscale"
+    mkdir -p files/usr/sbin
+    TAILSCALE_URL="https://pkgs.tailscale.com/stable/tailscale_latest_amd64.tgz"
+    wget -qO /tmp/tailscale_latest_amd64.tgz $TAILSCALE_URL
+    tar xzf /tmp/tailscale_latest_amd64.tgz -C /tmp
+    cp /tmp/tailscale_*_amd64/tailscale files/usr/sbin/tailscale
+    cp /tmp/tailscale_*_amd64/tailscaled files/usr/sbin/tailscaled
+    chmod +x files/usr/sbin/tailscale files/usr/sbin/tailscaled
+    rm -rf /tmp/tailscale_*_amd64 /tmp/tailscale_latest_amd64.tgz
+fi
+
+# 解包、过滤冗余底部栏 HTML 并重新打包 IPK
+echo "🔄 正在解包、过滤底部并重新打包相关插件 IPK 文件..."
+for ipk in $(find /home/build/immortalwrt/packages /home/build/immortalwrt/extra-packages /tmp/store-run-repo -name "*.ipk" 2>/dev/null | grep -iE 'advancedplus|ssr-plus|passwall'); do
+    echo "处理: $ipk"
+    TMP_DIR="/tmp/patch_$(basename "$ipk")"
+    rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
+    cp "$ipk" "$TMP_DIR/"
+    cd "$TMP_DIR"
+    
+    # 支持 tar 或 ar 的 IPK 格式解包
+    ar x "$(basename "$ipk")" 2>/dev/null || tar -xzf "$(basename "$ipk")" 2>/dev/null
+    
+    if [ -f "data.tar.gz" ]; then
+        mkdir -p data_ext
+        tar -xzf data.tar.gz -C data_ext
+        
+        # 移除视图文件中渲染图标或“获取中”字样的 HTML 行
+        find data_ext/usr/lib/lua/luci/view/ -type f -name "*.htm" 2>/dev/null | while read htmfile; do
+            sed -i '/获取中/d' "$htmfile"
+            sed -i '/fa-google/d' "$htmfile"
+            sed -i '/fa-github/d' "$htmfile"
+            sed -i '/fa-baidu/d' "$htmfile"
+            sed -i '/fa-taobao/d' "$htmfile"
+            sed -i '/shadowsocksr_status/d' "$htmfile"
+        done
+        
+        cd data_ext
+        tar -czf ../data.tar.gz .
+        cd ..
+        
+        # 重新打包为 IPK (大部分较新的包为 tar.gz 规范)
+        if [ -f "debian-binary" ] && [ -f "control.tar.gz" ]; then
+            tar -czf "$ipk" debian-binary data.tar.gz control.tar.gz
+        fi
+    fi
+    cd - >/dev/null
+done
 
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
