@@ -133,25 +133,66 @@ for ipk in $(find /home/build/immortalwrt/packages /home/build/immortalwrt/extra
         if [ "$DATA_ARCHIVE" = "data.tar.zst" ]; then tar -I zstd -xf data.tar.zst -C data_ext; fi
         if [ "$DATA_ARCHIVE" = "data.tar.xz" ]; then tar -xJf data.tar.xz -C data_ext; fi
         
-        # 将带有 view 的目录结构复制到 OPENWRT FILES overlay 里
-        if [ -d "data_ext/usr/lib/lua/luci/view" ]; then
-            mkdir -p /home/build/immortalwrt/files/usr/lib/lua/luci/view
-            cp -r data_ext/usr/lib/lua/luci/view/* /home/build/immortalwrt/files/usr/lib/lua/luci/view/ 2>/dev/null || true
+        # 将插件所有解包的系统文件直接覆盖到 OPENWRT FILES 里
+        if [ -d "data_ext/usr" ] || [ -d "data_ext/www" ]; then
+            cp -ra data_ext/* /home/build/immortalwrt/files/ 2>/dev/null || true
         fi
     fi
     cd /home/build/immortalwrt
     rm -rf "$TMP_DIR"
 done
 
-# 在已复制到 files overlay 的视图文件上进行清理 (仅清理我们关心的含脚贴或不该有的代码)
-if [ -d "/home/build/immortalwrt/files/usr/lib/lua/luci/view" ]; then
-    find /home/build/immortalwrt/files/usr/lib/lua/luci/view/ -type f -name "*.htm" 2>/dev/null | while read htmfile; do
-        sed -i '/获取中/d' "$htmfile"
-        sed -i '/fa-google/d' "$htmfile"
-        sed -i '/fa-github/d' "$htmfile"
-        sed -i '/fa-baidu/d' "$htmfile"
-        sed -i '/fa-taobao/d' "$htmfile"
-        sed -i '/shadowsocksr_status/d' "$htmfile"
+# 全局深度清理：对所有已经覆盖过去的 JS, Lua, HTM 文件进行清理。
+# 无论是通过 cbi.template 还是 JS AJAX 动态写入的底部测试图标栏，均截断其输出。
+if [ -d "/home/build/immortalwrt/files" ]; then
+    echo "🧹 正在全局深度清理底部状态图标及文本..."
+    find /home/build/immortalwrt/files -type f \( -name "*.htm" -o -name "*.js" -o -name "*.lua" \) 2>/dev/null | while read target_file; do
+        # 匹配各种可能含底部强弹状态的标识，将其替换或删除
+        sed -i 's/获取中//g' "$target_file" 2>/dev/null
+        sed -i 's/Collecting data//g' "$target_file" 2>/dev/null
+        sed -i '/fa-google/I d' "$target_file" 2>/dev/null
+        sed -i '/fa-github/I d' "$target_file" 2>/dev/null
+        sed -i '/fa-baidu/I d' "$target_file" 2>/dev/null
+        sed -i '/fa-taobao/I d' "$target_file" 2>/dev/null
+        sed -i 's/icon-google//g' "$target_file" 2>/dev/null
+        sed -i 's/icon-github//g' "$target_file" 2>/dev/null
+        
+        # 针对于有些插件强行以 div append 给页脚的形式的破坏：
+        sed -i '/shadowsocksr_status/I d' "$target_file" 2>/dev/null
+        sed -i '/advancedplus_status/I d' "$target_file" 2>/dev/null
+        sed -i '/global-status-bar/I d' "$target_file" 2>/dev/null
+    done
+    
+    # 追加一段极强的全局 CSS，通过后台的通用主题文件 (若是 Argon 等)，彻底隐藏所有这些状态框
+    mkdir -p /home/build/immortalwrt/files/www/luci-static/resources
+    echo "
+    document.addEventListener('DOMContentLoaded', function() {
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '.global-status-bar, #advancedplus_status, .footer-status, [id*=\"status-bar\"], [class*=\"status-bar\"] { display: none !important; }';
+        document.head.appendChild(style);
+        setTimeout(function(){
+            document.querySelectorAll('div, p, span, fieldset').forEach(function(el){
+               if(el.innerText && (el.innerText.includes('获取中') || el.innerText.includes('Fetching'))){
+                  let p = el;
+                  while(p && p.tagName !== 'BODY') {
+                     if(p.style.position==='fixed' || p.innerHTML.includes('github') || p.innerHTML.includes('google')){ 
+                         p.style.display='none'; break; 
+                     }
+                     p = p.parentElement;
+                  }
+               }
+            });
+        }, 1500);
+    });" > /home/build/immortalwrt/files/www/luci-static/resources/kill_footer.js
+    
+    # 尝试把这段清理脚本挂载到所有的底栏文件（如果有）
+    find /home/build/immortalwrt/files/usr/lib/lua/luci/view/ -type f \( -name "footer.htm" -o -name "sysauth.htm" \) 2>/dev/null | while read foot; do
+        echo "<script src=\"/luci-static/resources/kill_footer.js\"></script>" >> "$foot"
+    done
+    # 针对ssr-plus的界面，挂载到 cbi 的挂载点
+    find /home/build/immortalwrt/files/usr/lib/lua/luci/view/shadowsocksr/ -type f -name "optimize_cbi_ui.htm" 2>/dev/null | while read ssrcbi; do
+        echo "<script src=\"/luci-static/resources/kill_footer.js\"></script>" >> "$ssrcbi"
     done
 fi
 
