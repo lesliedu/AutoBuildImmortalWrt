@@ -109,43 +109,51 @@ if echo "$PACKAGES" | grep -q "tailscale"; then
     rm -rf /tmp/tailscale_*_amd64 /tmp/tailscale_latest_amd64.tgz
 fi
 
-# 解包、过滤冗余底部栏 HTML 并重新打包 IPK
-echo "🔄 正在解包、过滤底部并重新打包相关插件 IPK 文件..."
+# 提取、过滤冗余底部栏 HTML 并利用 files overlay 覆盖（安全修改，避免破坏 IPK 格式）
+echo "🔄 正在提取相关插件的 HTML 以覆盖底部状态栏..."
 for ipk in $(find /home/build/immortalwrt/packages /home/build/immortalwrt/extra-packages /tmp/store-run-repo -name "*.ipk" 2>/dev/null | grep -iE 'advancedplus|ssr-plus|passwall'); do
-    echo "处理: $ipk"
-    TMP_DIR="/tmp/patch_$(basename "$ipk")"
+    echo "静态提取并 patching: $ipk"
+    TMP_DIR="/tmp/extract_$(basename "$ipk")"
     rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
     cp "$ipk" "$TMP_DIR/"
     cd "$TMP_DIR"
     
-    # 支持 tar 或 ar 的 IPK 格式解包
+    # 解压 ipk 到临时目录
     ar x "$(basename "$ipk")" 2>/dev/null || tar -xzf "$(basename "$ipk")" 2>/dev/null
     
-    if [ -f "data.tar.gz" ]; then
+    DATA_ARCHIVE=""
+    if [ -f "data.tar.gz" ]; then DATA_ARCHIVE="data.tar.gz"; fi
+    if [ -f "data.tar.zst" ]; then DATA_ARCHIVE="data.tar.zst"; fi
+    if [ -f "data.tar.xz" ]; then DATA_ARCHIVE="data.tar.xz"; fi
+    
+    if [ -n "$DATA_ARCHIVE" ]; then
         mkdir -p data_ext
-        tar -xzf data.tar.gz -C data_ext
+        # 解压数据包
+        if [ "$DATA_ARCHIVE" = "data.tar.gz" ]; then tar -xzf data.tar.gz -C data_ext; fi
+        if [ "$DATA_ARCHIVE" = "data.tar.zst" ]; then tar -I zstd -xf data.tar.zst -C data_ext; fi
+        if [ "$DATA_ARCHIVE" = "data.tar.xz" ]; then tar -xJf data.tar.xz -C data_ext; fi
         
-        # 移除视图文件中渲染图标或“获取中”字样的 HTML 行
-        find data_ext/usr/lib/lua/luci/view/ -type f -name "*.htm" 2>/dev/null | while read htmfile; do
-            sed -i '/获取中/d' "$htmfile"
-            sed -i '/fa-google/d' "$htmfile"
-            sed -i '/fa-github/d' "$htmfile"
-            sed -i '/fa-baidu/d' "$htmfile"
-            sed -i '/fa-taobao/d' "$htmfile"
-            sed -i '/shadowsocksr_status/d' "$htmfile"
-        done
-        
-        cd data_ext
-        tar -czf ../data.tar.gz .
-        cd ..
-        
-        # 重新打包为 IPK (大部分较新的包为 tar.gz 规范)
-        if [ -f "debian-binary" ] && [ -f "control.tar.gz" ]; then
-            tar -czf "$ipk" debian-binary data.tar.gz control.tar.gz
+        # 将带有 view 的目录结构复制到 OPENWRT FILES overlay 里
+        if [ -d "data_ext/usr/lib/lua/luci/view" ]; then
+            mkdir -p /home/build/immortalwrt/files/usr/lib/lua/luci/view
+            cp -r data_ext/usr/lib/lua/luci/view/* /home/build/immortalwrt/files/usr/lib/lua/luci/view/ 2>/dev/null || true
         fi
     fi
-    cd - >/dev/null
+    cd /home/build/immortalwrt
+    rm -rf "$TMP_DIR"
 done
+
+# 在已复制到 files overlay 的视图文件上进行清理 (仅清理我们关心的含脚贴或不该有的代码)
+if [ -d "/home/build/immortalwrt/files/usr/lib/lua/luci/view" ]; then
+    find /home/build/immortalwrt/files/usr/lib/lua/luci/view/ -type f -name "*.htm" 2>/dev/null | while read htmfile; do
+        sed -i '/获取中/d' "$htmfile"
+        sed -i '/fa-google/d' "$htmfile"
+        sed -i '/fa-github/d' "$htmfile"
+        sed -i '/fa-baidu/d' "$htmfile"
+        sed -i '/fa-taobao/d' "$htmfile"
+        sed -i '/shadowsocksr_status/d' "$htmfile"
+    done
+fi
 
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
