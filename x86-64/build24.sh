@@ -48,7 +48,7 @@ PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luc
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
 # Passwall / SSR Plus 运行栈
 PACKAGES="$PACKAGES xray-core hysteria sing-box chinadns-ng haproxy shellsync geoview dns2socks dns2tcp ipt2socks v2ray-plugin"
-PACKAGES="$PACKAGES shadowsocks-libev-ss-server shadowsocks-rust-sslocal shadowsocks-rust-ssserver shadowsocksr-libev-ssr-check shadowsocksr-libev-ssr-local shadowsocksr-libev-ssr-redir shadowsocksr-libev-ssr-server simple-obfs-client"
+PACKAGES="$PACKAGES shadowsocks-libev-ss-server shadowsocks-libev-ss-local shadowsocks-libev-ss-redir shadowsocks-rust-sslocal shadowsocks-rust-ssserver shadowsocksr-libev-ssr-check shadowsocksr-libev-ssr-local shadowsocksr-libev-ssr-redir shadowsocksr-libev-ssr-server simple-obfs-client"
 PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn luci-app-ssr-plus"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
 PACKAGES="$PACKAGES zerotier luci-app-zerotier luci-i18n-zerotier-zh-cn"
@@ -108,6 +108,12 @@ if echo "$PACKAGES" | grep -q "tailscale"; then
     chmod +x files/usr/sbin/tailscale files/usr/sbin/tailscaled
     rm -rf /tmp/tailscale_*_amd64 /tmp/tailscale_latest_amd64.tgz
 fi
+
+# 获取最新的 GeoIP / GeoSite 数据文件供 Passwall / SSR Plus 使用
+echo "✅ 正在获取最新的 GeoIP / GeoSite 数据文件"
+mkdir -p files/usr/share/v2ray
+wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/usr/share/v2ray/geoip.dat
+wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/usr/share/v2ray/geosite.dat
 
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
