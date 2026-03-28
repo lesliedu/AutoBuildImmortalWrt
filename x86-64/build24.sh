@@ -115,6 +115,13 @@ mkdir -p files/usr/share/v2ray
 wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/usr/share/v2ray/geoip.dat
 wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/usr/share/v2ray/geosite.dat
 
+# 创建对 rust 版 shadowsocks 的软连接，兼容 PassWall 调用要求
+echo "✅ 正在创建 ss-local 等软链接兼容..."
+mkdir -p files/usr/bin
+ln -sf sslocal files/usr/bin/ss-local
+ln -sf sslocal files/usr/bin/ss-redir
+ln -sf ssserver files/usr/bin/ss-server
+
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
