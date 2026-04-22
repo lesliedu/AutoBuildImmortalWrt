@@ -44,27 +44,21 @@ fi
 # 输出调试信息
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 
-# ============= imm仓库内的插件==============
-# 定义所需安装的包列表 下列插件你都可以自行删减
-PACKAGES=""
-PACKAGES="$PACKAGES curl"
-PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn"
-PACKAGES="$PACKAGES luci-theme-argon"
-PACKAGES="$PACKAGES luci-app-argon-config"
-PACKAGES="$PACKAGES luci-i18n-argon-config-zh-cn"
-#25.12
-PACKAGES="$PACKAGES luci-i18n-package-manager-zh-cn"
-PACKAGES="$PACKAGES luci-i18n-ttyd-zh-cn"
-PACKAGES="$PACKAGES xray-core hysteria luci-i18n-passwall-zh-cn"
-PACKAGES="$PACKAGES luci-app-openclash"
-PACKAGES="$PACKAGES luci-i18n-homeproxy-zh-cn"
-PACKAGES="$PACKAGES openssh-sftp-server"
+# ============= 默认内置插件（全量移植自24.10 custom分支）==============
+COMMON_31_PACKAGES="luci-app-adguardhome adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn tailscale luci-app-netwizard luci-i18n-netwizard-zh-cn luci-app-partexp luci-i18n-partexp-zh-cn luci-app-watchdog luci-i18n-watchdog-zh-cn watchdog luci-app-advancedplus luci-i18n-advancedplus-zh-cn webdav2 luci-app-unishare unishare luci-app-turboacc luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services mosdns luci-app-arpbind luci-i18n-arpbind-zh-cn luci-app-netdata luci-i18n-netdata-zh-cn netdata luci-app-ramfree luci-i18n-ramfree-zh-cn luci-app-statistics luci-i18n-statistics-zh-cn luci-app-upnp luci-i18n-upnp-zh-cn miniupnpd-nftables luci-app-vlmcsd luci-i18n-vlmcsd-zh-cn vlmcsd luci-app-vsftpd luci-i18n-vsftpd-zh-cn vsftpd luci-app-wol luci-i18n-wol-zh-cn"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES $COMMON_31_PACKAGES"
 
-# 文件管理器
-PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
-# ======== shell/apk-custom-packages.sh =======
-# 合并imm仓库以外的第三方插件 暂时注释
+PACKAGES=""
+PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga unzip kmod-nft-tproxy kmod-nft-socket sshpass"
+PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luci-i18n-ttyd-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
+PACKAGES="$PACKAGES xray-core hysteria sing-box chinadns-ng haproxy shellsync geoview dns2socks dns2tcp ipt2socks v2ray-plugin"
+PACKAGES="$PACKAGES shadowsocks-rust-sslocal shadowsocks-rust-ssserver shadowsocksr-libev-ssr-check shadowsocksr-libev-ssr-local shadowsocksr-libev-ssr-redir shadowsocksr-libev-ssr-server simple-obfs-client"
+PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn luci-app-ssr-plus"
+PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
+PACKAGES="$PACKAGES zerotier luci-app-zerotier luci-i18n-zerotier-zh-cn"
+PACKAGES="$PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
 
@@ -87,6 +81,56 @@ if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
     wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/etc/openclash/GeoSite.dat
 else
     echo "⚪️ 未选择 luci-app-openclash"
+fi
+
+# 获取最新版 Tailscale
+if echo "$PACKAGES" | grep -q "tailscale"; then
+    echo "✅ 正在获取最新版 Tailscale"
+    mkdir -p files/usr/sbin
+    TAILSCALE_URL="https://pkgs.tailscale.com/stable/tailscale_latest_amd64.tgz"
+    wget -qO /tmp/tailscale_latest_amd64.tgz $TAILSCALE_URL
+    tar xzf /tmp/tailscale_latest_amd64.tgz -C /tmp
+    cp /tmp/tailscale_*_amd64/tailscale files/usr/sbin/tailscale
+    cp /tmp/tailscale_*_amd64/tailscaled files/usr/sbin/tailscaled
+    chmod +x files/usr/sbin/tailscale files/usr/sbin/tailscaled
+    rm -rf /tmp/tailscale_*_amd64 /tmp/tailscale_latest_amd64.tgz
+fi
+
+# 获取最新的 GeoIP / GeoSite 数据文件供 Passwall / SSR Plus 使用
+echo "✅ 正在获取最新的 GeoIP / GeoSite 数据文件"
+mkdir -p files/usr/share/v2ray
+wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/usr/share/v2ray/geoip.dat
+wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/usr/share/v2ray/geosite.dat
+
+# 创建对 rust 版 shadowsocks 的软连接，兼容 PassWall 调用要求
+echo "✅ 正在创建 ss-local 等软链接兼容..."
+mkdir -p files/usr/bin
+ln -sf sslocal files/usr/bin/ss-local
+ln -sf sslocal files/usr/bin/ss-redir
+ln -sf ssserver files/usr/bin/ss-server
+
+# 获取最新的 Bandix apk
+if echo "$PACKAGES" | grep -q "luci-app-bandix"; then
+    echo "✅ 已选择 luci-app-bandix，从原作者下载最新 apk"
+    mkdir -p packages
+    BANDIX_LUCI_VER="v0.12.6"
+    BANDIX_LUCI_BASE="https://github.com/timsaya/luci-app-bandix/releases/download/${BANDIX_LUCI_VER}"
+    wget -q "${BANDIX_LUCI_BASE}/luci-app-bandix-0.12.6-r1_all.apk" -O packages/luci-app-bandix-0.12.6-r1_all.apk
+    wget -q "${BANDIX_LUCI_BASE}/luci-i18n-bandix-zh-cn-26.068.39505.1002c41_all.apk" -O packages/luci-i18n-bandix-zh-cn-26.068.39505.1002c41_all.apk
+
+    BANDIX_CORE_VER="v0.12.7"
+    BANDIX_CORE_BASE="https://github.com/timsaya/openwrt-bandix/releases/download/${BANDIX_CORE_VER}"
+    wget -q "${BANDIX_CORE_BASE}/bandix-0.12.7-r1_x86_64.apk" -O packages/bandix-0.12.7-r1_x86_64.apk
+fi
+
+# 获取最新的 Passwall apk
+if echo "$PACKAGES" | grep -q "luci-app-passwall"; then
+    echo "✅ 已选择 luci-app-passwall，从原作者下载最新 apk"
+    mkdir -p packages
+    PASSWALL_VER="26.4.15"
+    PASSWALL_BASE="https://github.com/Openwrt-Passwall/openwrt-passwall/releases/download/${PASSWALL_VER}-1"
+    wget -q "${PASSWALL_BASE}/25.12%2B_luci-app-passwall-${PASSWALL_VER}-r1.apk" -O packages/luci-app-passwall-${PASSWALL_VER}-r1.apk
+    wget -q "${PASSWALL_BASE}/25.12%2B_luci-i18n-passwall-zh-cn-${PASSWALL_VER}.apk" -O packages/luci-i18n-passwall-zh-cn-${PASSWALL_VER}.apk
 fi
 
 # 构建镜像

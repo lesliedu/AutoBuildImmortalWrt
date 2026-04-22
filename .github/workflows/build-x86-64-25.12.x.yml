@@ -11,13 +11,9 @@ on:
           - 25.12.0-rc1
           - 25.12.0-rc2
       custom_router_ip:
-        description: "请设置路由器的管理地址(仅对多网口路由器有效) 格式:192.168.x.1 或 10.x.x.1"
+        description: "请设置路由器的管理地址(仅首次安装生效；升级保留原配置时会忽略) 格式:192.168.x.1 或 10.x.x.1"
         required: true
-        default: "192.168.100.1"
-      profile:
-        description: '请输入要编译固件大小 单位(MB)'
-        required: true
-        default: '1024'
+        default: "192.168.31.1"
       include_docker:
         description: |
           是否编译 Docker 插件
@@ -57,8 +53,7 @@ jobs:
         run: |
           mkdir -p "${{ github.workspace }}/custom"
           echo "${{ github.event.inputs.custom_router_ip }}" > "${{ github.workspace }}/custom/custom_router_ip.txt"
-          echo "您设置的路由器管理地址是:${{ github.event.inputs.custom_router_ip }}"
-          # 后续步骤会将该文件映射到路由器/etc/config/custom_router_ip.txt 以便用于开机脚本99-custom.sh读取用户设置的ip
+          echo "您设置的路由器管理地址是:${{ github.event.inputs.custom_router_ip }}（仅首次安装生效；升级保留配置时忽略）"
       
       - name: Validate PPPoE Inputs
         run: |
@@ -71,10 +66,9 @@ jobs:
 
       - name: Build ImmortalWrt-x86-64-efi 25.12.x
         run: |
-          profile="${{ github.event.inputs.profile }}"
           include_docker="${{ github.event.inputs.include_docker }}"
           luci_version="${{ github.event.inputs.luci_version }}"
-          echo "Building for profile: $profile"
+          echo "Building with fixed partition size 2048 from current build settings"
           docker run --rm -i \
             --user root \
             -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
@@ -83,12 +77,12 @@ jobs:
             -v "${{ github.workspace }}/x86-64/imm25.config:/home/build/immortalwrt/.config" \
             -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
             -v "${{ github.workspace }}/x86-64/build25.sh:/home/build/immortalwrt/build.sh" \
-            -e PROFILE=$profile \
+            -e PROFILE=2048 \
             -e INCLUDE_DOCKER=$include_docker \
             -e ENABLE_PPPOE=${{ inputs.enable_pppoe }} \
             -e PPPOE_ACCOUNT=${{ inputs.pppoe_account }} \
             -e PPPOE_PASSWORD=${{ inputs.pppoe_password }} \
-          immortalwrt/imagebuilder:x86-64-openwrt-${luci_version} /bin/bash /home/build/immortalwrt/build.sh
+          immortalwrt/imagebuilder:x86-64-openwrt-${{ github.event.inputs.luci_version }} /bin/bash /home/build/immortalwrt/build.sh
           
 
       - name: Create info
@@ -99,7 +93,7 @@ jobs:
            <img src="https://img.shields.io/badge/若下载慢可套用国内加速站下载-FC7C0D?logo=github&logoColor=fff&labelColor=000&style=for-the-badge"/>
           </a>
           
-          - 🏠 **后台地址**: ${{ github.event.inputs.custom_router_ip }}
+          - 🏠 **后台地址**: ${{ github.event.inputs.custom_router_ip }}（升级保留配置时会沿用原 LAN 地址）
           - 👤 **用户名**: root
           - 🔑 **密码**: 无
           EOF
