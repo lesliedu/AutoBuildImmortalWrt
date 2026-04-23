@@ -58,7 +58,7 @@ PACKAGES="$PACKAGES shadowsocks-rust-sslocal shadowsocks-rust-ssserver simple-ob
 PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
 PACKAGES="$PACKAGES zerotier luci-app-zerotier luci-i18n-zerotier-zh-cn"
-PACKAGES="$PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
+PACKAGES="$PACKAGES bandix luci-app-bandix luci-i18n-bandix-zh-cn"
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
 
@@ -136,6 +136,10 @@ fi
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
+
+# 针对 25.12 的 apk 特性，强制生成本地 packages/ 目录的索引，否则 ImageBuilder 无法识别直接下载的 apk
+echo "✅ 生成本地 APK 索引..."
+make package/index
 
 make image PROFILE="generic" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$PROFILE
 
