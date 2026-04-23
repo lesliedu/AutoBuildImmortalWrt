@@ -137,10 +137,6 @@ fi
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
 
-# 针对 25.12 的 apk 特性，强制生成本地 packages/ 目录的索引，否则 ImageBuilder 无法识别直接下载的 apk
-echo "✅ 生成本地 APK 索引..."
-make package/index
-
 make image PROFILE="generic" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$PROFILE
 
 if [ $? -ne 0 ]; then
