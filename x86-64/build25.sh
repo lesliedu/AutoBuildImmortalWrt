@@ -45,11 +45,11 @@ fi
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 
 # ============= 默认内置插件（全量移植自24.10 custom分支）==============
-COMMON_31_PACKAGES="luci-app-adguardhome adguardhome luci-app-tailscale luci-i18n-tailscale-zh-cn tailscale luci-app-partexp luci-i18n-partexp-zh-cn luci-app-watchcat luci-i18n-watchcat-zh-cn watchcat luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services mosdns luci-app-arpbind luci-i18n-arpbind-zh-cn luci-app-netdata luci-i18n-netdata-zh-cn netdata luci-app-ramfree luci-i18n-ramfree-zh-cn luci-app-statistics luci-i18n-statistics-zh-cn luci-app-upnp luci-i18n-upnp-zh-cn miniupnpd-nftables luci-app-vlmcsd luci-i18n-vlmcsd-zh-cn vlmcsd luci-app-vsftpd luci-i18n-vsftpd-zh-cn vsftpd luci-app-wol luci-i18n-wol-zh-cn"
+COMMON_31_PACKAGES="luci-app-adguardhome adguardhome luci-app-tailscale-community luci-i18n-tailscale-community-zh-cn tailscale luci-app-partexp luci-i18n-partexp-zh-cn luci-app-watchcat luci-i18n-watchcat-zh-cn watchcat luci-app-ddns luci-i18n-ddns-zh-cn ddns-scripts ddns-scripts-services mosdns luci-app-arpbind luci-i18n-arpbind-zh-cn luci-app-netdata luci-i18n-netdata-zh-cn netdata luci-app-ramfree luci-i18n-ramfree-zh-cn luci-app-statistics luci-i18n-statistics-zh-cn luci-app-upnp luci-i18n-upnp-zh-cn miniupnpd-nftables luci-app-vlmcsd luci-i18n-vlmcsd-zh-cn vlmcsd luci-app-vsftpd luci-i18n-vsftpd-zh-cn vsftpd luci-app-wol luci-i18n-wol-zh-cn"
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES $COMMON_31_PACKAGES"
 
 PACKAGES=""
-PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga unzip kmod-nft-tproxy kmod-nft-socket sshpass"
+PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga unzip sshpass"
 PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn luci-app-samba4 luci-i18n-samba4-zh-cn"
