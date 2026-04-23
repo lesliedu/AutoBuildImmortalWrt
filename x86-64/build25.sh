@@ -20,7 +20,7 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
 
 PACKAGES=""
 # 基础核心工具
-PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga unzip sshpass"
+PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga unzip sshpass ethtool"
 
 # 主题与界面
 PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
