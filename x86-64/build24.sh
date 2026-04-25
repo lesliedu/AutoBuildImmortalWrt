@@ -63,25 +63,16 @@ fi
 
 # Passwall 由原创作者 release 提供最新 ipk（23.05-24.10 通用包）
 if echo "$PACKAGES" | grep -q "luci-app-passwall"; then
-    echo "✅ 已选择 luci-app-passwall，下载原创作者最新版 ipk"
+    echo "✅ 已选择 luci-app-passwall，自动拉取原创作者最新版 ipk"
     mkdir -p packages
-    PASSWALL_VER="26.3.6"
-    PASSWALL_BASE="https://github.com/Openwrt-Passwall/openwrt-passwall/releases/download/${PASSWALL_VER}-1"
-    wget -q "${PASSWALL_BASE}/23.05-24.10_luci-app-passwall_${PASSWALL_VER}-r1_all.ipk" -O packages/luci-app-passwall_${PASSWALL_VER}-r1_all.ipk
-    wget -q "${PASSWALL_BASE}/23.05-24.10_luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk" -O packages/luci-i18n-passwall-zh-cn_${PASSWALL_VER}_all.ipk
+    wget -qO- "https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall/releases/latest" | grep -o "https://.*\.ipk" | grep "23.05-24.10" | xargs -n 1 wget -q -P packages/
 fi
 
 if echo "$PACKAGES" | grep -q "luci-app-bandix"; then
-    echo "✅ 已选择 luci-app-bandix，下载原创作者完整依赖链 ipk"
+    echo "✅ 已选择 luci-app-bandix，自动拉取原创作者完整依赖链 ipk"
     mkdir -p packages
-    BANDIX_LUCI_VER="v0.12.6"
-    BANDIX_LUCI_BASE="https://github.com/timsaya/luci-app-bandix/releases/download/${BANDIX_LUCI_VER}"
-    wget -q "${BANDIX_LUCI_BASE}/luci-app-bandix_0.12.6-r1_all.ipk" -O packages/luci-app-bandix_0.12.6-r1_all.ipk
-    wget -q "${BANDIX_LUCI_BASE}/luci-i18n-bandix-zh-cn_26.068.39505.1002c41_all.ipk" -O packages/luci-i18n-bandix-zh-cn_26.068.39505.1002c41_all.ipk
-
-    BANDIX_CORE_VER="v0.12.7"
-    BANDIX_CORE_BASE="https://github.com/timsaya/openwrt-bandix/releases/download/${BANDIX_CORE_VER}"
-    wget -q "${BANDIX_CORE_BASE}/bandix_0.12.7-r1_x86_64.ipk" -O packages/bandix_0.12.7-r1_x86_64.ipk
+    wget -qO- "https://api.github.com/repos/timsaya/luci-app-bandix/releases/latest" | grep -o "https://.*\.ipk" | grep -E "luci-app-bandix_|luci-i18n-bandix-zh-cn_" | xargs -n 1 wget -q -P packages/
+    wget -qO- "https://api.github.com/repos/timsaya/openwrt-bandix/releases/latest" | grep -o "https://.*x86_64\.ipk" | xargs -n 1 wget -q -P packages/
 fi
 
 # 若构建openclash 则添加内核
