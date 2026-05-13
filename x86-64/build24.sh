@@ -144,7 +144,7 @@ if [ -n "$HYSTERIA_URL" ]; then
 fi
 
 # 4. ChinaDNS-NG
-CHINADNS_URL=$(curl -s https://api.github.com/repos/zfl9/chinadns-ng/releases/latest | grep "browser_download_url" | grep -E 'chinadns-ng.*x86_64-linux-musl.*x86_64.*fast\+lto' | head -n 1 | cut -d '"' -f 4)
+CHINADNS_URL=$(curl -s https://api.github.com/repos/zfl9/chinadns-ng/releases/latest | grep "browser_download_url" | grep -E 'chinadns-ng%2Bwolfssl%40x86_64-linux-musl%40x86_64%40' | head -n 1 | cut -d '"' -f 4)
 if [ -n "$CHINADNS_URL" ]; then
     echo "  - 下载 ChinaDNS-NG..."
     wget -qO files/usr/bin/chinadns-ng "$CHINADNS_URL"
