@@ -106,12 +106,19 @@ mkdir -p files/usr/share/v2ray
 wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/usr/share/v2ray/geoip.dat
 wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/usr/share/v2ray/geosite.dat
 
-# 获取 Passwall 核心组件的最新二进制文件 (Xray, Sing-box, Hysteria, ChinaDNS-NG)
+# 获取 Passwall 核心组件的最新二进制文件 (Geoview, Xray, Sing-box, Hysteria, ChinaDNS-NG)
 echo "✅ 正在获取 Passwall 核心组件的最新二进制文件"
 mkdir -p files/usr/bin
 
+# 0. Geoview
+GEOVIEW_URL=$(curl -s https://api.github.com/repos/snowie2000/geoview/releases/latest | grep "browser_download_url" | grep "geoview-linux-amd64" | head -n 1 | cut -d '"' -f 4)
+if [ -n "$GEOVIEW_URL" ]; then
+    echo "  - 下载 Geoview..."
+    wget -qO files/usr/bin/geoview "$GEOVIEW_URL"
+fi
+
 # 1. Xray-core
-XRAY_URL=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | grep "browser_download_url" | grep "Xray-linux-64.zip" | head -n 1 | cut -d '"' -f 4)
+XRAY_URL=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | grep "browser_download_url" | grep "Xray-linux-64.zip" | head -n 1 | cut -d '"' -f 4)
 if [ -n "$XRAY_URL" ]; then
     echo "  - 下载 Xray-core..."
     wget -qO /tmp/xray.zip "$XRAY_URL"
@@ -120,7 +127,7 @@ if [ -n "$XRAY_URL" ]; then
 fi
 
 # 2. Sing-box
-SINGBOX_URL=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep "browser_download_url" | grep "linux-amd64.tar.gz" | head -n 1 | cut -d '"' -f 4)
+SINGBOX_URL=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep "browser_download_url" | grep "linux-amd64-musl.tar.gz" | head -n 1 | cut -d '"' -f 4)
 if [ -n "$SINGBOX_URL" ]; then
     echo "  - 下载 Sing-box..."
     wget -qO /tmp/sing-box.tar.gz "$SINGBOX_URL"
@@ -143,7 +150,7 @@ if [ -n "$CHINADNS_URL" ]; then
     wget -qO files/usr/bin/chinadns-ng "$CHINADNS_URL"
 fi
 
-chmod +x files/usr/bin/xray files/usr/bin/sing-box files/usr/bin/hysteria files/usr/bin/chinadns-ng 2>/dev/null || true
+chmod +x files/usr/bin/geoview files/usr/bin/xray files/usr/bin/sing-box files/usr/bin/hysteria files/usr/bin/chinadns-ng 2>/dev/null || true
 
 # 创建对 rust 版 shadowsocks 的软连接，兼容 PassWall 调用要求
 echo "✅ 正在创建 ss-local 等软链接兼容..."
