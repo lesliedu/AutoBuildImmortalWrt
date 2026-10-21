@@ -27,38 +27,43 @@ ls -lah /home/build/immortalwrt/packages/ || true
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建 25.12 固件..."
 
-# ============= 基础核心与系统工具 (100% 经过 25.12 官方源验证) =============
+# ============= 基础核心与界面工具 (带全套中文语言包) =============
 PACKAGES=""
 PACKAGES="$PACKAGES curl openssh-sftp-server qemu-ga unzip sshpass ethtool"
 PACKAGES="$PACKAGES kmod-nft-tproxy kmod-nft-socket"
-PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config"
-PACKAGES="$PACKAGES luci-app-ttyd luci-app-diskman luci-app-samba4 luci-app-filemanager"
+PACKAGES="$PACKAGES luci-theme-argon luci-app-argon-config luci-i18n-argon-config-zh-cn"
+PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn"
+PACKAGES="$PACKAGES luci-app-ttyd luci-i18n-ttyd-zh-cn"
+PACKAGES="$PACKAGES luci-app-diskman luci-i18n-diskman-zh-cn"
+PACKAGES="$PACKAGES luci-app-samba4 luci-i18n-samba4-zh-cn"
+PACKAGES="$PACKAGES luci-app-filemanager luci-i18n-filemanager-zh-cn"
 
-# ============= Passwall 代理运行栈与核心依赖 =============
+# ============= Passwall 代理运行栈与核心依赖 (带中文) =============
 PACKAGES="$PACKAGES xray-core hysteria sing-box chinadns-ng haproxy shellsync geoview dns2socks dns2tcp ipt2socks v2ray-plugin"
 PACKAGES="$PACKAGES shadowsocks-rust-sslocal shadowsocks-rust-ssserver simple-obfs-client"
-PACKAGES="$PACKAGES luci-app-passwall"
-PACKAGES="$PACKAGES smartdns luci-app-smartdns"
+PACKAGES="$PACKAGES luci-app-passwall luci-i18n-passwall-zh-cn"
+PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
 
-# ============= 常用服务与系统扩展 =============
-PACKAGES="$PACKAGES luci-app-ddns-go ddns-go"
-PACKAGES="$PACKAGES luci-app-watchcat watchcat"
-PACKAGES="$PACKAGES zerotier luci-app-zerotier"
-PACKAGES="$PACKAGES luci-app-tailscale-community tailscale"
-PACKAGES="$PACKAGES luci-app-arpbind"
-PACKAGES="$PACKAGES luci-app-netdata netdata"
-PACKAGES="$PACKAGES luci-app-ramfree"
-PACKAGES="$PACKAGES luci-app-statistics"
-PACKAGES="$PACKAGES luci-app-upnp miniupnpd-nftables"
-PACKAGES="$PACKAGES luci-app-vlmcsd vlmcsd"
-PACKAGES="$PACKAGES luci-app-vsftpd vsftpd"
-PACKAGES="$PACKAGES luci-app-wol"
+# ============= 常用服务与系统扩展 (全套官方中文) =============
+PACKAGES="$PACKAGES luci-app-ddns-go luci-i18n-ddns-go-zh-cn ddns-go"
+PACKAGES="$PACKAGES luci-app-quickstart luci-i18n-quickstart-zh-cn"
+PACKAGES="$PACKAGES luci-app-watchcat luci-i18n-watchcat-zh-cn watchcat"
+PACKAGES="$PACKAGES zerotier luci-app-zerotier luci-i18n-zerotier-zh-cn"
+PACKAGES="$PACKAGES luci-app-tailscale-community luci-i18n-tailscale-community-zh-cn tailscale"
+PACKAGES="$PACKAGES luci-app-arpbind luci-i18n-arpbind-zh-cn"
+PACKAGES="$PACKAGES luci-app-netdata luci-i18n-netdata-zh-cn netdata"
+PACKAGES="$PACKAGES luci-app-ramfree luci-i18n-ramfree-zh-cn"
+PACKAGES="$PACKAGES luci-app-statistics luci-i18n-statistics-zh-cn"
+PACKAGES="$PACKAGES luci-app-upnp luci-i18n-upnp-zh-cn miniupnpd-nftables"
+PACKAGES="$PACKAGES luci-app-vlmcsd luci-i18n-vlmcsd-zh-cn vlmcsd"
+PACKAGES="$PACKAGES luci-app-vsftpd luci-i18n-vsftpd-zh-cn vsftpd"
+PACKAGES="$PACKAGES luci-app-wol luci-i18n-wol-zh-cn"
 PACKAGES="$PACKAGES mosdns"
 
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
 if [ "$INCLUDE_DOCKER" = "yes" ]; then
-    PACKAGES="$PACKAGES luci-app-dockerman"
+    PACKAGES="$PACKAGES luci-app-dockerman luci-i18n-dockerman-zh-cn"
 fi
 
 # Passwall 自动拉取原创作者发布的最新版 25.12+ apk，并规范文件名去除 25.12+_ 前缀
