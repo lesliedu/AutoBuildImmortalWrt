@@ -46,7 +46,6 @@ PACKAGES="$PACKAGES smartdns luci-app-smartdns luci-i18n-smartdns-zh-cn"
 
 # ============= 常用服务与系统扩展 (全套官方中文) =============
 PACKAGES="$PACKAGES luci-app-ddns-go luci-i18n-ddns-go-zh-cn ddns-go"
-PACKAGES="$PACKAGES luci-app-quickstart luci-i18n-quickstart-zh-cn"
 PACKAGES="$PACKAGES luci-app-watchcat luci-i18n-watchcat-zh-cn watchcat"
 PACKAGES="$PACKAGES zerotier luci-app-zerotier luci-i18n-zerotier-zh-cn"
 PACKAGES="$PACKAGES luci-app-tailscale-community luci-i18n-tailscale-community-zh-cn tailscale"
