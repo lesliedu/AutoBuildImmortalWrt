@@ -61,10 +61,17 @@ if [ "$INCLUDE_DOCKER" = "yes" ]; then
     PACKAGES="$PACKAGES luci-app-dockerman"
 fi
 
+# Passwall 自动拉取原创作者发布的最新版 25.12+ apk，并规范文件名去除 25.12+_ 前缀
 if echo "$PACKAGES" | grep -q "luci-app-passwall"; then
     echo "✅ 已选择 luci-app-passwall，自动拉取原创作者最新版 25.12+ apk"
     mkdir -p packages
-    wget -qO- "https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall/releases/latest" | grep -o "https://[^\"]*25.12[^\"]*\.apk" | xargs -n 1 wget -q -P packages/
+    PASSWALL_URLS=$(curl -s "https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall/releases/latest" | grep -o "https://[^\"]*25.12[^\"]*\.apk")
+    for url in $PASSWALL_URLS; do
+        raw_name=$(basename "$url")
+        clean_name=$(echo "$raw_name" | sed -E 's/^25\.12(%2B|\+)_//')
+        echo "  - 下载 Passwall apk: $clean_name"
+        wget -qO "packages/$clean_name" "$url"
+    done
 fi
 
 if echo "$PACKAGES" | grep -q "tailscale"; then
