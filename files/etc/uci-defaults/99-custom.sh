@@ -98,7 +98,7 @@ uci set dropbear.@dropbear[0].Interface=''
 uci commit
 
 # 对齐服务启用状态（仅首次安装生效；升级时保留原配置优先）
-for svc in qemu-ga passwall smartdns ddns-go tailscale watchcat; do
+for svc in qemu-ga passwall smartdns ddns-go tailscale watchdog; do
     if [ -x "/etc/init.d/$svc" ]; then
         /etc/init.d/$svc enable >/dev/null 2>&1 || true
     fi

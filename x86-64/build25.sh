@@ -66,6 +66,19 @@ if [ "$INCLUDE_DOCKER" = "yes" ]; then
     PACKAGES="$PACKAGES luci-app-dockerman luci-i18n-dockerman-zh-cn"
 fi
 
+# sirpdboy 安全看门狗 (Web/SSH 防爆破守护) 自动拉取最新版 apk
+if echo "" | grep -q "luci-app-watchdog"; then
+    echo "✅ 已选择 luci-app-watchdog，自动拉取 sirpdboy 最新版安全看门狗 apk"
+    mkdir -p packages /tmp/watchdog_dl
+    WATCHDOG_URL=
+    if [ -n "" ]; then
+        wget -qO /tmp/watchdog_dl/watchdog.tar.gz ""
+        tar -xzf /tmp/watchdog_dl/watchdog.tar.gz -C /tmp/watchdog_dl
+        cp -v /tmp/watchdog_dl/packages_ci/*.apk packages/
+        rm -rf /tmp/watchdog_dl
+    fi
+fi
+
 # Passwall 自动拉取原创作者发布的最新版 25.12+ apk，并规范文件名去除 25.12+_ 前缀
 if echo "$PACKAGES" | grep -q "luci-app-passwall"; then
     echo "✅ 已选择 luci-app-passwall，自动拉取原创作者最新版 25.12+ apk"
