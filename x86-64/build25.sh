@@ -67,12 +67,12 @@ if [ "$INCLUDE_DOCKER" = "yes" ]; then
 fi
 
 # sirpdboy 安全看门狗 (Web/SSH 防爆破守护) 自动拉取最新版 apk
-if echo "" | grep -q "luci-app-watchdog"; then
+if echo "$PACKAGES" | grep -q "luci-app-watchdog"; then
     echo "✅ 已选择 luci-app-watchdog，自动拉取 sirpdboy 最新版安全看门狗 apk"
     mkdir -p packages /tmp/watchdog_dl
-    WATCHDOG_URL=
-    if [ -n "" ]; then
-        wget -qO /tmp/watchdog_dl/watchdog.tar.gz ""
+    WATCHDOG_URL=$(curl -s "https://api.github.com/repos/sirpdboy/luci-app-watchdog/releases/latest" | grep "browser_download_url" | grep "SNAPSHOT-x86_64.tar.gz" | head -n 1 | cut -d '"' -f 4)
+    if [ -n "$WATCHDOG_URL" ]; then
+        wget -qO /tmp/watchdog_dl/watchdog.tar.gz "$WATCHDOG_URL"
         tar -xzf /tmp/watchdog_dl/watchdog.tar.gz -C /tmp/watchdog_dl
         cp -v /tmp/watchdog_dl/packages_ci/*.apk packages/
         rm -rf /tmp/watchdog_dl
