@@ -36,7 +36,7 @@ PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn"
 PACKAGES="$PACKAGES luci-app-ttyd luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-app-diskman luci-i18n-diskman-zh-cn"
 PACKAGES="$PACKAGES luci-app-samba4 luci-i18n-samba4-zh-cn"
-PACKAGES="$PACKAGES luci-app-filemanager luci-i18n-filemanager-zh-cn"
+PACKAGES="$PACKAGES filebrowser luci-app-filebrowser-go luci-i18n-filebrowser-go-zh-cn"
 
 # ============= Passwall 代理运行栈与核心依赖 (带中文) =============
 PACKAGES="$PACKAGES xray-core hysteria sing-box chinadns-ng haproxy shellsync geoview dns2socks dns2tcp ipt2socks v2ray-plugin"
