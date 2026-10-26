@@ -7,7 +7,8 @@ echo "Starting 99-custom.sh at $(date)" >> $LOGFILE
 # yml 传入的路由器型号 PROFILE
 echo "Building for profile: $PROFILE"
 # yml 传入的固件大小 ROOTFS_PARTSIZE
-echo "Building for ROOTFS_PARTSIZE: $ROOTFS_PARTSIZE"
+KERNEL_PARTSIZE=${KERNEL_PARTSIZE:-256}
+echo "Building for ROOTFS_PARTSIZE: $ROOTFS_PARTSIZE, KERNEL_PARTSIZE: $KERNEL_PARTSIZE"
 echo "Include Docker: $INCLUDE_DOCKER"
 
 echo "Create pppoe-settings"
@@ -162,7 +163,7 @@ ln -sf ssserver files/usr/bin/ss-server
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
 
-make image PROFILE="$PROFILE" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$ROOTFS_PARTSIZE
+make image PROFILE="$PROFILE" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$ROOTFS_PARTSIZE KERNEL_PARTSIZE=$KERNEL_PARTSIZE
 
 if [ $? -ne 0 ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Build failed!"
