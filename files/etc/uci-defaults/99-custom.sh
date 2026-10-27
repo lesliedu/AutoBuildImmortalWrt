@@ -5,12 +5,10 @@ LOGFILE="/etc/config/uci-defaults-log.txt"
 echo "Starting 99-custom.sh at $(date)" >>$LOGFILE
 
 # 设置默认防火墙规则，方便单网口虚拟机首次访问 WebUI 
+# 因为本项目中 单网口模式是dhcp模式 直接就能上网并且访问web界面 避免新手每次都要修改/etc/config/network中的静态ip
+# 当你刷机运行后 都调整好了 你完全可以在web页面自行关闭 wan口防火墙的入站数据
+# 具体操作方法：网络——防火墙 在wan的入站数据 下拉选项里选择 拒绝 保存并应用即可。
 uci set firewall.@zone[1].input='ACCEPT'
-
-# 启用 Linux 内核原生网络流分载 (Flow Offloading)，实现内核级软转发加速 (平替旧版 Turbo ACC)
-uci set firewall.@defaults[0].flow_offloading='1'
-uci set firewall.@defaults[0].flow_offloading_hw='0'
-uci commit firewall
 
 # 设置主机名映射，解决安卓原生 TV 无法联网的问题
 uci add dhcp domain
@@ -186,17 +184,5 @@ uci delete ttyd.@ttyd[0].interface
 # 设置所有网口可连接 SSH
 uci set dropbear.@dropbear[0].Interface=''
 uci commit
-
-# 对齐服务启用状态（仅首次安装生效；升级时保留原配置优先）
-for svc in qemu-ga passwall smartdns ddns-go tailscale watchdog; do
-    if [ -x "/etc/init.d/$svc" ]; then
-        /etc/init.d/$svc enable >/dev/null 2>&1 || true
-    fi
-done
-for svc in openclash homeproxy lucky dockerd; do
-    if [ -x "/etc/init.d/$svc" ]; then
-        /etc/init.d/$svc disable >/dev/null 2>&1 || true
-    fi
-done
 
 exit 0
