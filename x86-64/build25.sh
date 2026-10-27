@@ -60,6 +60,9 @@ PACKAGES="$PACKAGES luci-app-vsftpd luci-i18n-vsftpd-zh-cn vsftpd"
 PACKAGES="$PACKAGES luci-app-wol luci-i18n-wol-zh-cn"
 PACKAGES="$PACKAGES mosdns"
 
+# ============= 无线驱动与组件支持 =============
+PACKAGES="$PACKAGES wpad-openssl iwinfo kmod-mt7921e kmod-mt7921-firmware"
+
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
 if [ "$INCLUDE_DOCKER" = "yes" ]; then

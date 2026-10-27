@@ -69,6 +69,7 @@ PACKAGES="$PACKAGES mosdns"
 PACKAGES="$PACKAGES luci-app-cpufreq luci-i18n-cpufreq-zh-cn"
 PACKAGES="$PACKAGES luci-app-partexp luci-i18n-partexp-zh-cn"
 PACKAGES="$PACKAGES wpad-openssl iwinfo"
+PACKAGES="$PACKAGES kmod-mt7921e kmod-mt7921-firmware kmod-rtw88-8822ce"
 
 PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
 
