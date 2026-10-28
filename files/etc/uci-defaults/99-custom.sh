@@ -1,7 +1,18 @@
 #!/bin/sh
 # 99-custom.sh 就是immortalwrt固件首次启动时运行的脚本 位于固件内的/etc/uci-defaults/99-custom.sh
-# Log file for debugging
+
+INIT_FLAG="/etc/config/custom_init_flag"
 LOGFILE="/etc/config/uci-defaults-log.txt"
+
+# 检查是否为已有系统 / 保留配置升级：
+# 1. 检测持久化标记 /etc/config/custom_init_flag (保留配置升级时 /etc/config/ 下所有文件都会被原生恢复)
+# 2. 检测历史日志文件是否非空 (兼容从旧版本升级而来的设备)
+# 3. 检测原生 sysupgrade 升级包文件
+IS_UPGRADE=0
+if [ -f "$INIT_FLAG" ] || [ -s "$LOGFILE" ] || [ -f /sysupgrade.tgz ] || [ -f /tmp/sysupgrade.tar ] || [ -f /boot/sysupgrade.tgz ]; then
+    IS_UPGRADE=1
+fi
+
 echo "Starting 99-custom.sh at $(date)" >>$LOGFILE
 
 # 设置默认防火墙规则，方便单网口虚拟机首次访问 WebUI 
@@ -24,9 +35,10 @@ else
     . "$SETTINGS_FILE"
 fi
 
-# 检查是否为保留配置升级 (OpenWrt 官方原生机制：保留配置升级时 /sysupgrade.tgz 会存在于根目录下，直到系统启动完成 /etc/init.d/done 时才会被删除)
-if [ -f /sysupgrade.tgz ] || [ -f /tmp/sysupgrade.tar ] || [ -f /boot/sysupgrade.tgz ]; then
-    echo "Upgrade with kept settings detected (/sysupgrade.tgz exists), preserving existing network configuration." >>$LOGFILE
+# 检查是否为保留配置升级 (保留配置升级时跳过物理网口重新映射及默认IP覆盖)
+if [ "$IS_UPGRADE" -eq 1 ]; then
+    echo "Upgrade with kept settings detected, preserving existing network configuration." >>$LOGFILE
+    touch "$INIT_FLAG"
 else
     echo "Fresh install detected, initializing network interfaces and IP..." >>$LOGFILE
 
@@ -134,6 +146,7 @@ else
 
         uci commit network
     fi
+    touch "$INIT_FLAG"
 fi
 
 # 若安装了dockerd 则设置docker的防火墙规则
