@@ -7,7 +7,7 @@ echo "Starting 99-custom.sh at $(date)" >> $LOGFILE
 # yml 传入的路由器型号 PROFILE
 echo "Building for profile: $PROFILE"
 # yml 传入的固件大小 ROOTFS_PARTSIZE
-KERNEL_PARTSIZE=${KERNEL_PARTSIZE:-256}
+KERNEL_PARTSIZE=${KERNEL_PARTSIZE:-288}
 echo "Building for ROOTFS_PARTSIZE: $ROOTFS_PARTSIZE, KERNEL_PARTSIZE: $KERNEL_PARTSIZE"
 echo "Include Docker: $INCLUDE_DOCKER"
 
