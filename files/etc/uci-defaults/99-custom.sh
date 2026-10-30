@@ -15,11 +15,14 @@ fi
 
 echo "Starting 99-custom.sh at $(date)" >>$LOGFILE
 
-# 设置默认防火墙规则，方便单网口虚拟机首次访问 WebUI 
-# 因为本项目中 单网口模式是dhcp模式 直接就能上网并且访问web界面 避免新手每次都要修改/etc/config/network中的静态ip
-# 当你刷机运行后 都调整好了 你完全可以在web页面自行关闭 wan口防火墙的入站数据
-# 具体操作方法：网络——防火墙 在wan的入站数据 下拉选项里选择 拒绝 保存并应用即可。
-uci set firewall.@zone[1].input='ACCEPT'
+# 设置默认防火墙规则，动态匹配所有名为 wan 的区域，彻底放通入站管理流量 (WebUI/SSH 等) 并立即持久化
+for z in $(uci show firewall | grep "=zone" | cut -d. -f2 | cut -d= -f1); do
+    if [ "$(uci -q get firewall.$z.name)" = "wan" ]; then
+        uci set firewall.$z.input='ACCEPT'
+    fi
+done
+uci -q set firewall.@zone[1].input='ACCEPT'
+uci commit firewall
 
 # 设置主机名映射，解决安卓原生 TV 无法联网的问题
 uci add dhcp domain
@@ -125,8 +128,8 @@ else
             echo "custom router ip is $CUSTOM_IP" >> $LOGFILE
         else
             uci -q delete network.lan.ipaddr
-            uci set network.lan.ipaddr='192.168.100.1'
-            echo "default router ip is 192.168.100.1" >> $LOGFILE
+            uci set network.lan.ipaddr='192.168.99.1'
+            echo "default router ip is 192.168.99.1" >> $LOGFILE
         fi
 
         # PPPoE设置
